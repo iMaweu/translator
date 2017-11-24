@@ -1,4 +1,6 @@
 %{
+#include <assert.h>
+#include <limits.h>
 #include <ctype.h>
 #include <stdio.h>
 
@@ -10,7 +12,10 @@ void yyerror (char const *s);
 %}
 
 %define api.value.type {int}
-%token DIGIT
+%define parse.error verbose
+
+%token INTEGER
+%token OVERFLOW
 
 %%
 stmt:  add ';' {printf("result = %d\n", $1);}
@@ -27,24 +32,34 @@ mul:    prim       {$$=$1;}
     | mul '/' prim {$$ = $1 / $3;}
 ;
 
-prim:   DIGIT       {$$=$1;}
+prim:   INTEGER       {$$=$1;}
     |'('add')'      {$$ = $2;}
 ;
+
 %%
 
 int yylex ()
 {
-  int c = getc(stdin);
-  if (isdigit (c))                
+  char c = getc(stdin);
+  if (isdigit(c))
   {
-     yylval = c - '0';
-     return DIGIT;
+    yylval = 0;
+    while (isdigit(c))                
+    {
+      yylval = yylval * 10 + (c - '0');
+      c = getc(stdin);
+    }
+    ungetc(c, stdin);
+    return INTEGER;
   }
   else if (c == '\n')
   {  
     return 0;
   }
-  return c;                                
+  else
+  {
+    return c;                                
+  }
 }
 
 void yyerror (char const *s)
