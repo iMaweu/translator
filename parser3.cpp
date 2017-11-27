@@ -9,6 +9,7 @@ bool op1(const char * &s, char &symbol);
 bool prim(const char * &s, unsigned int& result);
 bool digit(const char * &s, unsigned int& result);
 int parse(const char * s);
+bool add1(const char * &s, unsigned int& result);
 
 bool stmt(const char * s, unsigned int& result)
 {
@@ -25,38 +26,35 @@ bool add(const char * &s, unsigned int& result)
 {
   if (mul(s, result))
   {
-    unsigned int m;
-    char symbol;
-    
-    while (true)
+    return add1(s,result);
+  }
+  return false;
+}
+
+bool add1(const char * &s, unsigned int& result)
+{
+  unsigned int m;
+  char symbol;
+
+    if (op2(s, symbol))
     {
-      if (op2(s, symbol))
+      if (mul(s, m))
       {
-        if (mul(s, m))
+        switch (symbol)
         {
-          switch (symbol)
-          {
-          case '+': result = result + m;
-            break;
-          case '-': result = result - m;
-            break;
-          }
-          continue;
+        case '+': result = result + m;
+          break;
+        case '-': result = result - m;
+          break;
         }
-        else
-        {
-          return false;
-        }
+        add1(s,result);
       }
       else
       {
-        break;
+        return false;
       }
     }
-
     return true;
-  }
-  return false;
 }
 
 bool op2(const char * &s, char &c)
