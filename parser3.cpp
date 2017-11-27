@@ -23,26 +23,37 @@ bool stmt(const char * s, unsigned int& result)
 
 bool add(const char * &s, unsigned int& result)
 {
-  unsigned int a;
-  if (mul(s, a))
+  if (mul(s, result))
   {
+    unsigned int m;
     char symbol;
-    if (op2(s, symbol))
+    
+    while (true)
     {
-      unsigned int m;
-      if(mul(s,m))
+      if (op2(s, symbol))
       {
-        switch(symbol)
+        if (mul(s, m))
         {
-        case '+': result = a+m;
-          break;
-        case '-': result = a-m;
-          break;
+          switch (symbol)
+          {
+          case '+': result = result + m;
+            break;
+          case '-': result = result - m;
+            break;
+          }
+          continue;
         }
-        return true;
+        else
+        {
+          return false;
+        }
+      }
+      else
+      {
+        break;
       }
     }
-    result = a;
+
     return true;
   }
   return false;
@@ -170,9 +181,20 @@ Status parse(const char * s, int expect)
 
 int main()
 {
+  assert(parse("1;", 1) == Status::OK);
+  assert(parse("1+2;", 3) == Status::OK);
+  assert(parse("1+2+3;", 6) == Status::OK);
+  assert(parse("1+2+3+4;", 10) == Status::OK);
+
+  assert(parse("1;", 1) == Status::OK);
+  assert(parse("1-2;", -1) == Status::OK);
+  assert(parse("1-2-3;", -4) == Status::OK);
+  assert(parse("1-2-3-4;", -8) == Status::OK);
+
   assert(parse("(6-2)*2;", 8) == Status::OK);
   assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
   assert(parse("(6-2)*2", 8) == Status::SYNTAX_ERROR);
+
   char wait = getc(stdin);
   return 0;
 }
