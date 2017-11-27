@@ -1,6 +1,13 @@
 #include <stdio.h>
 #include <assert.h>
 
+enum class Status
+{
+  OK,
+  WRONG_RESULT,
+  SYNTAX_ERROR
+};
+
 bool stmt(const char * s, unsigned int& result);
 bool add(const char * &s, unsigned int& result);
 bool op2(const char * &s, char &c);
@@ -8,7 +15,7 @@ bool mul(const char * &s, unsigned int& result);
 bool op1(const char * &s, char &symbol);
 bool prim(const char * &s, unsigned int& result);
 bool digit(const char * &s, unsigned int& result);
-int parse(const char * s);
+Status parse(const char * s, int expect);
 
 bool stmt(const char * s, unsigned int& result)
 {
@@ -53,7 +60,6 @@ bool add(const char * &s, unsigned int& result)
         break;
       }
     }
-
     return true;
   }
   return false;
@@ -75,29 +81,37 @@ bool op2(const char * &s, char &c)
 
 bool mul(const char * &s, unsigned int& result)
 {
-  unsigned int m;
-  if (prim(s, m))
+  if (prim(s, result))
   {
     char symbol;
-    if (op1(s, symbol))
+    unsigned int p;
+    while (true)
     {
-      unsigned int p;
-      if(prim(s,p))
+      if (op1(s, symbol))
       {
-        switch(symbol)
+        if (prim(s, p))
         {
-        case '*': result = m*p;
-          break;
-        case '/': result = m/p;
-          break;
+          switch (symbol)
+          {
+          case '*': result = result*p;
+            break;
+          case '/': result = result / p;
+            break;
+          }
+          continue;
         }
-        return true;
+        else
+        {
+          return false;
+        }
       }
+      return true;
     }
-    result = m;
-    return true;
   }
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 bool op1(const char * &s, char &symbol)
@@ -153,14 +167,6 @@ bool digit(const char * &s, unsigned int& result)
   }
 }
 
-enum class Status
-{
-  OK,
-  WRONG_RESULT,
-  SYNTAX_ERROR
-};
-
-
 Status parse(const char * s, int expect)
 {
   unsigned int result;
@@ -178,7 +184,6 @@ Status parse(const char * s, int expect)
   }
 }
 
-
 int main()
 {
   assert(parse("1;", 1) == Status::OK);
@@ -190,6 +195,23 @@ int main()
   assert(parse("1-2;", -1) == Status::OK);
   assert(parse("1-2-3;", -4) == Status::OK);
   assert(parse("1-2-3-4;", -8) == Status::OK);
+
+  assert(parse("9*1;", 9) == Status::OK);
+  assert(parse("9*1*3;", 27) == Status::OK);
+  assert(parse("1*2*3*4;", 24) == Status::OK);
+
+  assert(parse("2/1;", 2) == Status::OK);
+  assert(parse("5/2/1;", 2) == Status::OK);
+  assert(parse("9/2/3;", 1) == Status::OK);
+
+  assert(parse("9/1/3;", 1) == Status::WRONG_RESULT);
+  assert(parse("9/2/1/1;", 2) == Status::WRONG_RESULT);
+
+  assert(parse("/1/3;", 1) == Status::SYNTAX_ERROR);
+  assert(parse("9//3;", 1) == Status::SYNTAX_ERROR);
+  assert(parse("9/13;", 1) == Status::SYNTAX_ERROR);
+  assert(parse("9/1/;", 1) == Status::SYNTAX_ERROR);
+
 
   assert(parse("(6-2)*2;", 8) == Status::OK);
   assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
