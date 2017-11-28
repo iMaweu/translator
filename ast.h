@@ -29,4 +29,9 @@ struct Tree
   TreeType type;
   TreePayload payload;
 };
+
+void print(const Tree * tree);
+Tree * generate(TreeType treeType, TreePayload treePayload);
+void clear(Tree * tree);
+
 #endif
