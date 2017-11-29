@@ -6,7 +6,7 @@ enum class TreeType { ADD, MUL, PRIM, NUM };
 
 union TreePayload
 {
-  TreePayload::TreePayload() {}
+  //TreePayload::TreePayload() {}
   TreePayload::TreePayload(Tree * _branch) : branch(_branch) {}
   TreePayload::TreePayload(int _value) : value(_value) {}
   TreePayload::TreePayload(Tree * _left, Tree * _right) 

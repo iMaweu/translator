@@ -64,28 +64,25 @@ void clear(Tree * tree)
   {
     clear(tree->payload.branches.left);
     clear(tree->payload.branches.right);
-    delete tree;
     break;
   }
   case TreeType::MUL:
   {
     clear(tree->payload.branches.left);
     clear(tree->payload.branches.right);
-    delete tree;
     break;
   }
   case TreeType::PRIM:
   {
     clear(tree->payload.branch);
-    delete tree;
     break;
   }
   case TreeType::NUM:
   {
-    delete tree;
     return;
   }
   }
+  delete tree;
 }
 
 void print_test()
@@ -159,7 +156,7 @@ void clear_test()
   print(t8);
 }
 
-int main()
+int main1()
 {
   print_test();
   clear_test();
