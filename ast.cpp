@@ -13,53 +13,69 @@ void print(const Tree * tree)
   {
   case TreeType::DIGIT:
   {
-    std::cout << "DIGIT( "<< tree->payload.value << " )";
+    std::cout << "DIGIT ( "<< tree->payload.value << " )";
     break;
   }
-  case TreeType::NUM:
+  case TreeType::NUM1:
   {
-    std::cout << "NUM(";
+    std::cout << "NUM1 (";
     print(tree->payload.branch);
+    std::cout << ")";
+    break;
+  }
+  case TreeType::NUM2:
+  {
+    std::cout << "NUM2 (";
+    print(tree->payload.branches.left);
+    std::cout << ", ";
+    print(tree->payload.branches.right);
     std::cout << ")";
     break;
   }
   case TreeType::PRIM:
   {
-    std::cout << "PRIM( ";
+    std::cout << "PRIM (";
     print(tree->payload.branch);
-    std::cout << " )";
+    std::cout << ")";
     break;
   }
   case TreeType::MUL1:
   {
-    std::cout << "MUL1( ";
+    std::cout << "MUL1 (";
     print(tree->payload.branch);
-    std::cout << " )";
+    std::cout << ")";
     break;
   }
   case TreeType::MUL2:
   {
-    std::cout << "MUL( ";
+    std::cout << "MUL2 (";
     print(tree->payload.branches.left);
     std::cout << ", ";
     print(tree->payload.branches.right);
-    std::cout << " )";
+    std::cout << ")";
     break;
   }
   case TreeType::ADD1:
   {
-    std::cout << "ADD1( ";
+    std::cout << "ADD1 (";
     print(tree->payload.branch);
-    std::cout << " )";
+    std::cout << ")";
     break;
   }
   case TreeType::ADD2:
   {
-    std::cout << "ADD2( ";
+    std::cout << "ADD2 (";
     print(tree->payload.branches.left);
     std::cout << ", ";
     print(tree->payload.branches.right);
-    std::cout << " )";
+    std::cout << ")";
+    break;
+  }
+  case TreeType::STMT:
+  {
+    std::cout << "STMT (";
+    print(tree->payload.branch);
+    std::cout << ")";
     break;
   }
   }
@@ -68,7 +84,7 @@ void print(const Tree * tree)
 void printTree(const Tree * tree)
 {
   print(tree);
-  std::cout << std::endl;
+  std::cout << std::endl << std::endl;
 }
 Tree * generate(TreeType treeType, TreePayload treePayload)
 {
@@ -76,9 +92,14 @@ Tree * generate(TreeType treeType, TreePayload treePayload)
   return tree;
 }
 
-Tree * generate_num(Tree * branch)
+Tree * generate_num1(Tree * branch)
 {
-  return new Tree{ TreeType::NUM, {branch}};
+  return new Tree{ TreeType::NUM1, {branch}};
+}
+
+Tree *generate_num2(Tree *branch1, Tree *branch2)
+{
+  return new Tree{ TreeType::NUM2,{branch1,branch2} };
 }
 
 Tree * generate_prim(Tree * branch)
@@ -109,6 +130,11 @@ Tree * generate_mul2(Tree * branch1, Tree* branch2)
 Tree * generate_digit(int d)
 {
   return new Tree{ TreeType::DIGIT, {d} };
+}
+
+Tree *generate_stmt(Tree * branch)
+{
+  return new Tree{ TreeType::STMT,{branch} };
 }
 
 void clear(Tree * tree)
@@ -146,7 +172,18 @@ void clear(Tree * tree)
     clear(tree->payload.branch);
     break;
   }
-  case TreeType::NUM:
+  case TreeType::NUM1:
+  {
+    clear(tree->payload.branch);
+    break;
+  }
+  case TreeType::NUM2:
+  {
+    clear(tree->payload.branches.left);
+    clear(tree->payload.branches.right);
+    break;
+  }
+  case TreeType::STMT:
   {
     clear(tree->payload.branch);
     break;
@@ -159,80 +196,47 @@ void clear(Tree * tree)
   delete tree;
 }
 
-/*void print_test()
+
+void test()
 {
-  Tree * t1 = generate( TreeType::ADD2,{nullptr,nullptr});
-  print(t1);
-  std::cout << "\n";
-
-  Tree * t2 = generate(TreeType::NUM, 3 );
-  print(t2);
-  std::cout << "\n";
-
-  Tree * t3 = generate(TreeType::PRIM, {t2} );
-  print(t3);
-  std::cout << "\n";
-
-  Tree * t4 = generate(TreeType::PRIM, {nullptr} );
-  print(t4);
-  std::cout << "\n";
-
-  Tree * t5 = generate(TreeType::PRIM, t1 );
-  print(t5);
-  std::cout << "\n";
-
-  Tree * t6 = generate(TreeType::MUL2,{nullptr,nullptr} );
-  print(t6);
-  std::cout << "\n";
-
-  Tree * t7 = generate(TreeType::MUL2,{t4,t4} );
-  print(t7);
-  std::cout << "\n";
-
-  Tree * t8 = generate(TreeType::MUL2, { generate(TreeType::PRIM,{generate(TreeType::NUM,8)}), nullptr});
-  print(t8);
-  std::cout << "\n";
-}*/
-
-void clear_test()
-{
-  /*Tree * t1 = generate_add2(generate_mul2(generate_prim(generate_num(generate_digit(0))),generate_prim(generate_num(generate_digit(4))) ),
-                            generate_mul2(generate_prim(generate_num(generate_digit(1))),generate_prim(generate_num(generate_digit(3))) ));
+  Tree * t1 = generate_add2(generate_mul2(generate_prim(generate_num1(generate_digit(0))),generate_prim(generate_num1(generate_digit(4))) ),
+                            generate_mul2(generate_prim(generate_num1(generate_digit(1))),generate_prim(generate_num1(generate_digit(3))) ));
   printTree(t1);
-  clear(t1);*/
+  clear(t1);
 
-  Tree * t2 = generate_num(generate_digit(3));
+  Tree * t2 = generate_num1(generate_digit(3));
   printTree(t2);
   clear(t2);
 
-  Tree * t3 =generate_prim(generate_num(generate_digit(6)));
+  Tree * t3 =generate_prim(generate_num1(generate_digit(6)));
   printTree(t3);
   clear(t3);
 
-  Tree * t4 = generate_num(generate_digit(0));
+  Tree * t4 = generate_prim(generate_digit(0));
   printTree(t4);
   clear(t4);
 
-  /*Tree * t5 = generate(TreeType::PRIM,  {generate(TreeType::NUM,generate(TreeType::DIGIT, 1))} );
+  Tree * t5 = generate_prim(generate_num1(generate_digit(1)));
+  printTree(t5);
   clear(t5);
-  printTree(t5);*/
 
-  /*Tree * t6 = generate_mul2(generate_prim(generate_num(generate_digit(0))),generate_prim(generate_num(generate_digit(4))) );
+  Tree * t6 = generate_mul2(generate_prim(generate_num1(generate_digit(0))),generate_prim(generate_num1(generate_digit(4))) );
   printTree(t6);
-  clear(t6);*/
+  clear(t6);
 
-//  Tree * t7 = generate(TreeType::MUL2,{generate(TreeType::PRIM, {nullptr} ),generate(TreeType::PRIM, {nullptr} )} );
-//  clear(t7);
-//  printTree(t7);
-//
-//  Tree * t8 = generate(TreeType::MUL2, { generate(TreeType::PRIM,{generate(TreeType::NUM,generate(TreeType::DIGIT, 8))}), nullptr});
-//  clear(t8);
-//  printTree(t8);
+  Tree * t7 = generate_mul2(generate_prim(nullptr), generate_prim(nullptr));
+  printTree(t7);
+  clear(t7);
+
+  Tree * t8 = generate_mul2(generate_prim(generate_num1(generate_digit(8))), nullptr);
+  printTree(t8);
+  clear(t8);
+
 }
 
-int main()
+int main1()
 {
-  clear_test();
+  test();
   char wait; std::cin >> wait;
   return 0;
 }
