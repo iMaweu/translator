@@ -10,9 +10,7 @@ enum class Status
 
 bool stmt(const char * s, unsigned int& result);
 bool add(const char * &s, unsigned int& result);
-bool op2(const char * &s, char &c);
 bool mul(const char * &s, unsigned int& result);
-bool op1(const char * &s, char &symbol);
 bool prim(const char * &s, unsigned int& result);
 bool digit(const char * &s, unsigned int& result);
 bool integer(const char * &s, unsigned int& result);
@@ -21,7 +19,7 @@ Status parse(const char * s, int expect);
 bool stmt(const char * s, unsigned int& result)
 {
   bool validAdd = add(s, result);
-  if ( validAdd && s[0] == ';')
+  if (validAdd && s[0] == ';')
   {
     s++;
     return true;
@@ -31,115 +29,81 @@ bool stmt(const char * s, unsigned int& result)
 
 bool add(const char * &s, unsigned int& result)
 {
-  if (mul(s, result))
-  {
-    unsigned int m;
-    char symbol;
-    
-    while (true)
-    {
-      if (op2(s, symbol))
-      {
-        if (mul(s, m))
-        {
-          switch (symbol)
-          {
-          case '+': result = result + m;
-            break;
-          case '-': result = result - m;
-            break;
-          }
-          continue;
-        }
-        else
-        {
-          return false;
-        }
-      }
-      else
-      {
-        break;
-      }
-    }
-    return true;
-  }
-  else
+  if (!mul(s, result))
   {
     return false;
   }
-}
 
-bool op2(const char * &s, char &c)
-{
-  if(s[0] == '+' || s[0] == '-')
+  unsigned int p;
+  while (true)
   {
-    c=s[0];
-    s++;
-    return true;
+    switch (*s)
+    {
+    case '+':
+      s++;
+      if (!mul(s, p))
+      {
+        return false;
+      }
+      result += p;
+      break;
+    case '-':
+      s++;
+      if (!mul(s, p))
+      {
+        return false;
+      }
+      result -= p;
+      break;
+    default:
+      break;
+    }
   }
-  else 
-  {
-    return false;
-  }
+  return true;
 }
 
 bool mul(const char * &s, unsigned int& result)
 {
-  if (prim(s, result))
+  if (!prim(s, result))
   {
-    char symbol;
-    unsigned int p;
-    while (true)
+    return false;
+  }
+
+  unsigned int p;
+  while (true)
+  {
+    switch (*s)
     {
-      if (op1(s, symbol))
+    case '*':
+      s++;
+      if (!prim(s, p))
       {
-        if (prim(s, p))
-        {
-          switch (symbol)
-          {
-          case '*': result = result*p;
-            break;
-          case '/': result = result / p;
-            break;
-          default: return false;
-          }
-          continue;
-        }
-        else
-        {
-          return false;
-        }
+        return false;
       }
-      return true;
+      result *= p;
+      break;
+    case '/':
+      s++;
+      if (!prim(s, p))
+      {
+        return false;
+      }
+      result /= p;
+      break;
+    default:
+      break;
     }
   }
-  else
-  {
-    return false;
-  }
-}
-
-bool op1(const char * &s, char &symbol)
-{
-  if(s[0] == '*' || s[0] == '/')
-  {
-    symbol=s[0];
-    s++;
-    return true;
-  }
-  else 
-  {
-    return false;
-  }
+  return true;
 }
 
 
 bool prim(const char * &s, unsigned int& result)
 {
-  if(s[0] =='(')
+  if (s[0] == '(')
   {
     s++;
-    if(!add(s, result) && s[0] != ')')
+    if (!add(s, result) || s[0] != ')')
     {
       return false;
     }
@@ -149,7 +113,7 @@ bool prim(const char * &s, unsigned int& result)
       return true;
     }
   }
-  else 
+  else
   {
     return (integer(s, result));
   }
@@ -162,9 +126,9 @@ bool integer(const char * &s, unsigned int& result)
   {
     result = i;
     while (digit(s, i))
-      {
-        result = 10 * result + i;
-      }
+    {
+      result = 10 * result + i;
+    }
     return true;
   }
   else
@@ -204,7 +168,7 @@ Status parse(const char * s, int expect)
   }
 }
 
-int main()
+void run_asserts()
 {
   assert(parse("1;", 1) == Status::OK);
   assert(parse("1+2;", 3) == Status::OK);
@@ -253,7 +217,11 @@ int main()
   assert(parse("(6-2)*2;", 8) == Status::OK);
   assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
   assert(parse("(6-2)*2", 8) == Status::SYNTAX_ERROR);
+}
 
+int main()
+{
+  run_asserts();
   char wait = getc(stdin);
   return 0;
 }
