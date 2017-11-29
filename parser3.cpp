@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include "ast.h"
 
 enum class Status
 {
@@ -8,126 +9,124 @@ enum class Status
   SYNTAX_ERROR
 };
 
-bool stmt(const char * s, unsigned int& result);
-bool add(const char * &s, unsigned int& result);
-bool mul(const char * &s, unsigned int& result);
-bool prim(const char * &s, unsigned int& result);
-bool digit(const char * &s, unsigned int& result);
-bool integer(const char * &s, unsigned int& result);
+bool stmt(const char * s, Tree  * &tree);
+bool add(const char * &s, Tree * &tree);
+bool mul(const char * &s, Tree * &tree);
+bool prim(const char * &s, Tree * &tree);
+bool digit(const char * &s, Tree * &tree);
+bool integer(const char * &s, Tree * &tree);
 Status parse(const char * s, int expect);
 
-bool stmt(const char * s, unsigned int& result)
+bool stmt(const char * s, Tree * &tree)
 {
-  bool validAdd = add(s, result);
+  bool validAdd = add(s, tree);
   if (validAdd && s[0] == ';')
   {
-    s++;
+    tree = generate_stmt(tree);
     return true;
   }
   return false;
 }
 
-bool add(const char * &s, unsigned int& result)
+bool add(const char * &s, Tree* &tree)
 {
-  if (!mul(s, result))
+  if (!mul(s, tree))
   {
     return false;
   }
 
-  unsigned int p;
+  Tree * tree2{nullptr};
   while (true)
   {
     switch (*s)
     {
     case '+':
       s++;
-      if (!mul(s, p))
+      if (!mul(s, tree2))
       {
         return false;
       }
-      result += p;
+      tree = generate_add2( tree, tree2 );
       break;
     case '-':
       s++;
-      if (!mul(s, p))
+      if (!mul(s, tree2))
       {
         return false;
       }
-      result -= p;
+      tree = generate_add2( tree, tree2 );
       break;
     default:
-      break;
+      tree = generate_add1(tree);
+      return true;
     }
   }
-  return true;
 }
 
-bool mul(const char * &s, unsigned int& result)
+bool mul(const char * &s, Tree * &tree)
 {
-  if (!prim(s, result))
+  if (!prim(s, tree))
   {
     return false;
   }
 
-  unsigned int p;
+  Tree * tree2{ nullptr };
   while (true)
   {
     switch (*s)
     {
     case '*':
       s++;
-      if (!prim(s, p))
+      if (!prim(s, tree2))
       {
         return false;
       }
-      result *= p;
+      tree = generate_mul2( tree, tree2 );
       break;
     case '/':
       s++;
-      if (!prim(s, p))
+      if (!prim(s, tree2))
       {
         return false;
       }
-      result /= p;
+      tree = generate_mul2( tree, tree2 );
       break;
     default:
-      break;
-    }
-  }
-  return true;
-}
-
-
-bool prim(const char * &s, unsigned int& result)
-{
-  if (s[0] == '(')
-  {
-    s++;
-    if (!add(s, result) || s[0] != ')')
-    {
-      return false;
-    }
-    else
-    {
-      s++;
+      tree = generate_mul1(tree);
       return true;
     }
   }
-  else
-  {
-    return (integer(s, result));
-  }
 }
 
-bool integer(const char * &s, unsigned int& result)
+
+bool prim(const char * &s, Tree * &tree)
 {
-  unsigned int i{ 0 };
-  if (digit(s, i))
+  if (s[0] == '(')
   {
-    result = i;
-    while (digit(s, i))
+    if (!add(++s, tree) || s[0] !=')')
     {
-      result = 10 * result + i;
+      return false;
+    }
+    ++s;
+  }
+  else if (!integer(s, tree))
+  {
+    return false;
+  }
+  tree = generate_prim(tree);
+  return true;
+}
+
+bool integer(const char * &s, Tree* &tree)
+{
+
+  if (digit(s, tree))
+  {
+    tree = generate_num1(tree);
+    Tree * tree2{nullptr};
+    while (digit(s, tree2))
+    {
+      tree = generate_num2( tree, tree2 );
     }
     return true;
   }
@@ -137,11 +136,11 @@ bool integer(const char * &s, unsigned int& result)
   }
 }
 
-bool digit(const char * &s, unsigned int& result)
+bool digit(const char * &s, Tree * &tree)
 {
   if (s[0] >= '0' && s[0] <= '9')
   {
-    result = s[0] - '0';
+    tree = generate_digit( s[0] - '0');
     s++;
     return true;
   }
@@ -153,19 +152,20 @@ bool digit(const char * &s, unsigned int& result)
 
 Status parse(const char * s, int expect)
 {
-  unsigned int result;
-  if (!stmt(s, result))
+  Tree * tree { nullptr };
+  if (!stmt(s, tree))
   {
     return Status::SYNTAX_ERROR;
   }
-  else if (result == expect)
-  {
-    return Status::OK;
-  }
   else
   {
-    return Status::WRONG_RESULT;
+    printTree(tree);
+    return Status::OK;
   }
+  /*else
+  {
+    return Status::WRONG_RESULT;
+  }*/
 }
 
 void run_asserts()
@@ -190,8 +190,8 @@ void run_asserts()
   assert(parse("5/2/1;", 2) == Status::OK);
   assert(parse("9/2/3;", 1) == Status::OK);
 
-  assert(parse("9/1/3;", 1) == Status::WRONG_RESULT);
-  assert(parse("9/2/1/1;", 2) == Status::WRONG_RESULT);
+  //assert(parse("9/1/3;", 1) == Status::WRONG_RESULT);
+  //assert(parse("9/2/1/1;", 2) == Status::WRONG_RESULT);
 
   assert(parse("/1/3;", 1) == Status::SYNTAX_ERROR);
   assert(parse("9//3;", 1) == Status::SYNTAX_ERROR);
@@ -215,8 +215,9 @@ void run_asserts()
   assert(parse("10*2*30;", 600) == Status::OK);
 
   assert(parse("(6-2)*2;", 8) == Status::OK);
-  assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
+  //assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
   assert(parse("(6-2)*2", 8) == Status::SYNTAX_ERROR);
+  
 }
 
 int main()
