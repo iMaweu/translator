@@ -46,7 +46,7 @@ bool add(const char * &s, Tree* &tree)
       {
         return false;
       }
-      tree = generate_add2( tree, tree2 );
+      tree = generate_add2( tree, tree2,'+' );
       break;
     case '-':
       s++;
@@ -54,7 +54,7 @@ bool add(const char * &s, Tree* &tree)
       {
         return false;
       }
-      tree = generate_add2( tree, tree2 );
+      tree = generate_add2( tree, tree2,'-' );
       break;
     default:
       tree = generate_add1(tree);
@@ -81,7 +81,7 @@ bool mul(const char * &s, Tree * &tree)
       {
         return false;
       }
-      tree = generate_mul2( tree, tree2 );
+      tree = generate_mul2( tree, tree2,'*' );
       break;
     case '/':
       s++;
@@ -89,7 +89,7 @@ bool mul(const char * &s, Tree * &tree)
       {
         return false;
       }
-      tree = generate_mul2( tree, tree2 );
+      tree = generate_mul2( tree, tree2,'/' );
       break;
     default:
       tree = generate_mul1(tree);
@@ -97,7 +97,6 @@ bool mul(const char * &s, Tree * &tree)
     }
   }
 }
-
 
 bool prim(const char * &s, Tree * &tree)
 {
@@ -220,7 +219,7 @@ void run_asserts()
   
 }
 
-int main()
+int main1()
 {
   run_asserts();
   char wait = getc(stdin);
