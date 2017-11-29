@@ -2,7 +2,7 @@
 #define AST_H
 struct Tree;
 
-enum class TreeType { ADD, MUL, PRIM, NUM };
+enum class TreeType { ADD1,ADD2, MUL1, MUL2, PRIM, NUM, DIGIT};
 
 union TreePayload
 {
@@ -31,7 +31,13 @@ struct Tree
 };
 
 void print(const Tree * tree);
-Tree * generate(TreeType treeType, TreePayload treePayload);
+Tree *generate_num(Tree *);
+Tree *generate_prim(Tree *);
+Tree *generate_add1(Tree *);
+Tree *generate_mul1(Tree *);
+Tree *generate_add2(Tree *,Tree*);
+Tree *generate_mul2(Tree *,Tree*);
+Tree *generate_digit(int);
 void clear(Tree * tree);
 
 #endif
