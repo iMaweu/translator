@@ -164,8 +164,17 @@ TreeStmt * generate_stmt(TreeAdd * add)
   return new TreeStmt{ add };
 }
 
-/*
-void clear(Tree * tree)
+void clearStmt(TreeStmt * tree)
+{
+  if (tree == nullptr)
+  {
+    return;
+  }
+  clearAdd(tree->add);
+  delete tree;
+}
+
+void clearAdd(TreeAdd * tree)
 {
   if (tree == nullptr)
   {
@@ -173,31 +182,81 @@ void clear(Tree * tree)
   }
   switch (tree->type)
   {
-  case TreeType::DIGIT:
-  {
+  case TreeAdd::TreeAddType::ADD1:
+    clearMul(tree->payload.add1);
     break;
-  }
-  case TreeType::STMT:
-  case TreeType::PRIM:
-  case TreeType::NUM1:
-  case TreeType::MUL1:
-  case TreeType::ADD1:
-  {
-    clear(tree->payload.branch);
+  case TreeAdd::TreeAddType::ADD2:
+    clearAdd(tree->payload.add2.add);
+    clearMul(tree->payload.add2.mul);
     break;
-  }
-  case TreeType::MUL2:
-  case TreeType::NUM2:
-  case TreeType::ADD2:
-  {
-    clear(tree->payload.branches.left);
-    clear(tree->payload.branches.right);
-    break;
-  }
   }
   delete tree;
 }
-*/
+
+void clearMul(TreeMul * tree)
+{
+  if (tree == nullptr)
+  {
+    return;
+  }
+  switch (tree->type)
+  {
+  case TreeMul::TreeMulType::MUL1:
+    clearPrim(tree->payload.mul1);
+    break;
+  case TreeMul::TreeMulType::MUL2:
+    clearMul(tree->payload.mul2.mul);
+    clearPrim(tree->payload.mul2.prim);
+    break;
+  }
+  delete tree;
+}
+
+void clearPrim(TreePrim * tree)
+{
+  if (tree == nullptr)
+  {
+    return;
+  }
+  switch (tree->type)
+  {
+  case TreePrim::TreePrimType::ADD:
+    clearAdd(tree->payload.add);
+    break;
+  case TreePrim::TreePrimType::NUM:
+    clearNum(tree->payload.num);
+    break;
+  }
+  delete tree;
+}
+
+void clearNum(TreeNum * tree)
+{
+  if (tree == nullptr)
+  {
+    return;
+  }
+  switch (tree->type)
+  {
+  case TreeNum::TreeNumType::NUM1:
+    clearDigit(tree->payload.num1);
+    break;
+  case TreeNum::TreeNumType::NUM2:
+    clearNum(tree->payload.num2.num);
+    clearDigit(tree->payload.num2.digit);
+    break;
+  }
+  delete tree;
+}
+
+void clearDigit(TreeDigit * tree)
+{
+  if (tree == nullptr)
+  {
+    return;
+  }
+  delete tree;
+}
 
 void test()
 {
@@ -209,18 +268,11 @@ void test()
           generate_mul1(
             generate_prim(
               generate_num1(
-                generate_digit(0)
-              )
-            )
-          ),
+                generate_digit(0)))),
           generate_prim(
             generate_num1(
-              generate_digit(4)
-            )
-          ),
-        '/'
-      )
-    ),
+              generate_digit(4))),
+        '/')),
       generate_mul1(
         generate_prim(
           generate_add1(
@@ -228,52 +280,66 @@ void test()
               generate_mul1(
                 generate_prim(
                   generate_num1(
-                    generate_digit(1)
-                  )
-                )
-              ),
+                    generate_digit(1)))),
               generate_prim(
                 generate_num1(
-                  generate_digit(3)
-                )
-              ),
-              '*'
-            )
-          )
-        )
-      ),
-      '-'
-    );
-
+                  generate_digit(3))),
+              '*')))),
+      '-');
   printAdd(t);
+  clearAdd(t);
+  printf("\n");
 
-  /*TreeNum * t2 = generate_num1(generate_digit(3));
+  TreeNum * t2 = generate_num1(generate_digit(3));
   printNum(t2);
-  clear(t2);
+  clearNum(t2);
+  printf("\n");
 
-  Tree * t3 =generate_prim(generate_num1(generate_digit(6)));
-  printTree(t3);
-  clear(t3);
+  TreePrim * t3 =generate_prim(generate_num1(generate_digit(6)));
+  printPrim(t3);
+  clearPrim(t3);
+  printf("\n");
 
-  Tree * t4 = generate_prim(generate_digit(0));
-  printTree(t4);
-  clear(t4);
+  TreePrim * t4 = generate_prim(generate_num1(generate_digit(0)));
+  printPrim(t4);
+  clearPrim(t4);
+  printf("\n");
 
-  Tree * t5 = generate_prim(generate_num1(generate_digit(1)));
-  printTree(t5);
-  clear(t5);
+  TreePrim * t5 = generate_prim(generate_num1(generate_digit(1)));
+  printPrim(t5);
+  clearPrim(t5);
+  printf("\n");
 
-  TreeMul * t6 = generate_mul2(generate_mul1(generate_prim(generate_num1(generate_digit(0)))),generate_prim(generate_num1(generate_digit(4))),'/');
-  printTree(t6);
-  clear(t6);
+  TreeMul * t6 = 
+    generate_mul2(
+      generate_mul1(
+        generate_prim(
+          generate_num1(
+            generate_digit(0)))),
+      generate_prim(
+        generate_num1(
+          generate_digit(4))),
+      '/');
+  printMul(t6);
+  clearMul(t6);
+  printf("\n");
 
-  Tree * t7 = generate_mul2(generate_prim(nullptr), generate_prim(nullptr),'*');
-  printTree(t7);
-  clear(t7);
+  TreeMul * t7 = 
+    generate_mul2(
+      generate_mul1(
+        generate_prim(
+          generate_num1(nullptr))),
+      generate_prim(
+        generate_num1(nullptr)),
+      '*');
+  printMul(t7);
+  clearMul(t7);
+  printf("\n");
 
-  Tree * t8 = generate_mul2(generate_prim(generate_num1(generate_digit(8))), nullptr,'*');
-  printTree(t8);
-  clear(t8);*/
+  TreeMul * t8 = generate_mul2(generate_mul1(generate_prim(generate_num1(generate_digit(8)))), nullptr,'*');
+  printMul(t8);
+  clearMul(t8);
+  printf("\n");
 
 }
 

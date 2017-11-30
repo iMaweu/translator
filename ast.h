@@ -110,7 +110,12 @@ void printPrim(const TreePrim * tree);
 void printNum(const TreeNum * tree);
 void printDigit(const TreeDigit * tree);
 
-//void clear(Tree * tree);
+void clearStmt(TreeStmt * tree);
+void clearAdd(TreeAdd * tree);
+void clearMul(TreeMul * tree);
+void clearPrim(TreePrim * tree);
+void clearNum(TreeNum * tree);
+void clearDigit(TreeDigit * tree);
 
 void test();
 
