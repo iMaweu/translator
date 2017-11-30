@@ -35,7 +35,7 @@ bool add(const char * &s, Tree* &tree)
     return false;
   }
 
-  Tree * tree2{nullptr};
+  Tree * tree2{ nullptr };
   while (true)
   {
     switch (*s)
@@ -46,7 +46,7 @@ bool add(const char * &s, Tree* &tree)
       {
         return false;
       }
-      tree = generate_add2( tree, tree2,'+' );
+      tree = generate_add2(tree, tree2, '+');
       break;
     case '-':
       s++;
@@ -54,7 +54,7 @@ bool add(const char * &s, Tree* &tree)
       {
         return false;
       }
-      tree = generate_add2( tree, tree2,'-' );
+      tree = generate_add2(tree, tree2, '-');
       break;
     default:
       tree = generate_add1(tree);
@@ -81,7 +81,7 @@ bool mul(const char * &s, Tree * &tree)
       {
         return false;
       }
-      tree = generate_mul2( tree, tree2,'*' );
+      tree = generate_mul2(tree, tree2, '*');
       break;
     case '/':
       s++;
@@ -89,7 +89,7 @@ bool mul(const char * &s, Tree * &tree)
       {
         return false;
       }
-      tree = generate_mul2( tree, tree2,'/' );
+      tree = generate_mul2(tree, tree2, '/');
       break;
     default:
       tree = generate_mul1(tree);
@@ -102,7 +102,7 @@ bool prim(const char * &s, Tree * &tree)
 {
   if (s[0] == '(')
   {
-    if (!add(++s, tree) || s[0] !=')')
+    if (!add(++s, tree) || s[0] != ')')
     {
       return false;
     }
@@ -122,10 +122,10 @@ bool integer(const char * &s, Tree* &tree)
   if (digit(s, tree))
   {
     tree = generate_num1(tree);
-    Tree * tree2{nullptr};
+    Tree * tree2{ nullptr };
     while (digit(s, tree2))
     {
-      tree = generate_num2( tree, tree2 );
+      tree = generate_num2(tree, tree2);
     }
     return true;
   }
@@ -139,7 +139,7 @@ bool digit(const char * &s, Tree * &tree)
 {
   if (s[0] >= '0' && s[0] <= '9')
   {
-    tree = generate_digit( s[0] - '0');
+    tree = generate_digit(s[0] - '0');
     s++;
     return true;
   }
@@ -151,20 +151,15 @@ bool digit(const char * &s, Tree * &tree)
 
 Status parse(const char * s, int expect)
 {
-  Tree * tree { nullptr };
+  Tree * tree{ nullptr };
   if (!stmt(s, tree))
   {
     return Status::SYNTAX_ERROR;
   }
   else
   {
-    printTree(tree);
-    return Status::OK;
+    return calculateTree(tree) == expect ? Status::OK : Status::WRONG_RESULT;
   }
-  /*else
-  {
-    return Status::WRONG_RESULT;
-  }*/
 }
 
 void run_asserts()
@@ -189,8 +184,8 @@ void run_asserts()
   assert(parse("5/2/1;", 2) == Status::OK);
   assert(parse("9/2/3;", 1) == Status::OK);
 
-  //assert(parse("9/1/3;", 1) == Status::WRONG_RESULT);
-  //assert(parse("9/2/1/1;", 2) == Status::WRONG_RESULT);
+  assert(parse("9/1/3;", 1) == Status::WRONG_RESULT);
+  assert(parse("9/2/1/1;", 2) == Status::WRONG_RESULT);
 
   assert(parse("/1/3;", 1) == Status::SYNTAX_ERROR);
   assert(parse("9//3;", 1) == Status::SYNTAX_ERROR);
@@ -214,12 +209,12 @@ void run_asserts()
   assert(parse("10*2*30;", 600) == Status::OK);
 
   assert(parse("(6-2)*2;", 8) == Status::OK);
-  //assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
+  assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
   assert(parse("(6-2)*2", 8) == Status::SYNTAX_ERROR);
-  
+
 }
 
-int main1()
+int main()
 {
   run_asserts();
   char wait = getc(stdin);
