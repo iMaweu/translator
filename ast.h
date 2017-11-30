@@ -1,52 +1,112 @@
 #ifndef AST_H
 #define AST_H
-struct Tree;
 
-enum class TreeType { STMT,ADD1,ADD2, MUL1, MUL2, PRIM, NUM1, NUM2, DIGIT};
+struct TreeAdd;
 
-union TreePayload
+struct TreeDigit
 {
-  TreePayload::TreePayload(Tree * _branch) : branch(_branch) {}
-  TreePayload::TreePayload(int _value) : value(_value) {}
-  TreePayload::TreePayload(Tree * _left, Tree * _right, char _operation) 
-  {
-    branches.left = _left;
-    branches.right = _right;
-    branches.operation = _operation;
-  }
-
   int value;
-  Tree * branch;
-  struct
-  {
-    Tree * left;
-    Tree * right;
-    char operation;
-  } branches;
 };
 
-struct Tree
+struct TreeNum
 {
-  TreeType type;
-  TreePayload payload;
+  enum TreeNumType {NUM1, NUM2} type;
+  union TreeNumPayload
+  {
+    struct
+    {
+      TreeNum * num;
+      TreeDigit * digit;
+    } num2;
+    TreeDigit * num1;
+  } payload;
+
+  TreeNum(TreeNum * _num, TreeDigit * _digit) : type{ TreeNumType::NUM2 }, payload { _num, _digit } {}
+  TreeNum(TreeDigit * _digit) : type{ TreeNumType::NUM1 }
+  {
+    payload.num1 = _digit;
+  }
 };
 
-Tree *generate_num1(Tree *);
-Tree *generate_num2(Tree *,Tree *);
-Tree *generate_prim(Tree *);
-Tree *generate_add1(Tree *);
-Tree *generate_mul1(Tree *);
-Tree *generate_add2(Tree *,Tree*,char);
-Tree *generate_mul2(Tree *,Tree*, char);
-Tree *generate_stmt(Tree*);
-Tree *generate_digit(int);
+struct TreePrim
+{
+  enum TreePrimType {NUM, ADD} type;
+  union TreePrimPayload
+  {
+    TreeAdd * add;
+    TreeNum * num;
+  } payload;
 
-void clear(Tree * tree);
+  TreePrim(TreeAdd * _add) : type{ TreePrimType::ADD }, payload{ _add } {}
+  TreePrim(TreeNum * _num) : type{ TreePrimType::NUM }
+  {
+    payload.num = _num;
+  }
+};
 
-void printTree(const Tree * tree);
-void print(const Tree * tree);
+struct TreeMul
+{
+  enum TreeMulType {MUL1, MUL2} type;
+  union TreeMulPayload
+  {
+    struct
+    {
+      TreeMul * mul;
+      TreePrim * prim;
+      char operation;
+    } mul2;
+    TreePrim * mul1;
+  } payload;
+
+  TreeMul(TreeMul * _mul, TreePrim * _prim, char _op) : type{ TreeMulType::MUL2 }, payload{ _mul,_prim,_op } {}
+  TreeMul(TreePrim * _prim) : type{ TreeMulType::MUL1 }
+  {
+    payload.mul1 = _prim;
+  }
+};
+
+struct TreeAdd
+{
+  enum TreeAddType {ADD1, ADD2} type;
+  union TreeAddPayload
+  {
+    struct
+    {
+      TreeAdd * add;
+      TreeMul * mul;
+      char operation;
+    } add2;
+    TreeMul * add1;
+  } payload;
+
+  TreeAdd(TreeAdd * _add, TreeMul * _mul, char _op) : type{ TreeAddType::ADD2 }, payload { _add, _mul,  _op } {}
+  TreeAdd(TreeMul * _mul) : type{ TreeAddType::ADD1 }
+  {
+    payload.add1 = _mul;
+  }
+};
+
+struct TreeStmt
+{
+  TreeAdd * add;
+  TreeStmt(TreeAdd * _add) : add(_add) {}
+};
+
+TreeDigit * generate_digit(int d);
+TreeNum *generate_num1(TreeDigit *);
+TreeNum *generate_num2(TreeNum *,TreeDigit *);
+TreePrim *generate_prim(TreeNum *);
+TreePrim *generate_prim(TreeAdd *);
+TreeMul *generate_mul1(TreePrim *);
+TreeMul *generate_mul2(TreeMul *,TreePrim *, char);
+TreeAdd *generate_add1(TreeMul *);
+TreeAdd *generate_add2(TreeAdd *,TreeMul*,char);
+TreeStmt *generate_stmt(TreeAdd *);
+
+
+//void clear(Tree * tree);
 
 void test();
 
-int calculateTree(Tree *);
+int calculateTree(TreeStmt *);
 #endif
