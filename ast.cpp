@@ -236,7 +236,7 @@ void test()
 
 }
 
-/*int calculateTree(Tree * tree)
+int calculateTree(Tree * tree)
 {
   if (tree == nullptr)
   {
@@ -245,39 +245,32 @@ void test()
   switch (tree->type)
   {
   case TreeType::STMT:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
   case TreeType::ADD1:
+  case TreeType::PRIM:
+  case TreeType::NUM1:
+  case TreeType::MUL1:
   {
-    break;
+    return calculateTree(tree->payload.branch);
   }
   case TreeType::ADD2:
   {
-    clear(tree->payload.branches.left);
-    clear(tree->payload.branches.right);
-    break;
-  }
-  case TreeType::MUL1:
-  {
-    clear(tree->payload.branch);
-    break;
+    switch (tree->payload.branches.operation)
+    {
+    case '+':
+      return calculateTree(tree->payload.branches.left) + calculateTree(tree->payload.branches.right);
+    case '-':
+      return calculateTree(tree->payload.branches.left) - calculateTree(tree->payload.branches.right);
+    }
   }
   case TreeType::MUL2:
   {
-    clear(tree->payload.branches.left);
-    clear(tree->payload.branches.right);
-    break;
-  }
-  case TreeType::PRIM:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
-  case TreeType::NUM1:
-  {
-    return calculateTree(tree->payload.branch);
+    switch (tree->payload.branches.operation)
+    {
+    case '*':
+      return calculateTree(tree->payload.branches.left) * calculateTree(tree->payload.branches.right);
+    case '/':
+      return calculateTree(tree->payload.branches.left) / calculateTree(tree->payload.branches.right);
+    }
   }
   case TreeType::NUM2:
   {
@@ -289,9 +282,9 @@ void test()
     return tree->payload.value;
   }
   }
-}*/
+}
 
-int main()
+int main1()
 {
   test();
   char wait; std::cin >> wait;
