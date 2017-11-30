@@ -1,4 +1,6 @@
 #include<iostream>
+#include <assert.h>
+
 #include "ast.h"
 
 void print(const Tree * tree)
@@ -208,6 +210,8 @@ int calculateTree(Tree * tree)
 {
   if (tree == nullptr)
   {
+    // TODO: track errors
+    assert(false);
     return 0;
   }
   switch (tree->type)
@@ -252,7 +256,7 @@ int calculateTree(Tree * tree)
   }
 }
 
-int main()
+int main1()
 {
   test();
   char wait; std::cin >> wait;
