@@ -103,6 +103,12 @@ TreeAdd *generate_add1(TreeMul *);
 TreeAdd *generate_add2(TreeAdd *,TreeMul*,char);
 TreeStmt *generate_stmt(TreeAdd *);
 
+void printStmt(const TreeStmt * tree);
+void printAdd(const TreeAdd * tree);
+void printMul(const TreeMul * tree);
+void printPrim(const TreePrim * tree);
+void printNum(const TreeNum * tree);
+void printDigit(const TreeDigit * tree);
 
 //void clear(Tree * tree);
 

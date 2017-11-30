@@ -1,141 +1,170 @@
 #include<iostream>
 #include <assert.h>
+#include <stdio.h>
 
 #include "ast.h"
 
-void print(const Tree * tree)
+
+void printStmt(const TreeStmt * tree)
 {
   if (tree == nullptr)
   {
-    std::cout << "NULL";
+    printf("NULL");
     return;
   }
+  printf("Stmt( ");
+  printAdd(tree->add);
+  printf(" )");
+}
 
+void printAdd(const TreeAdd * tree)
+{
+  if (tree == nullptr)
+  {
+    printf("NULL");
+    return;
+  }
   switch (tree->type)
   {
-  case TreeType::DIGIT:
+  case TreeAdd::TreeAddType::ADD1:
+    printf("Add1( ");
+    printMul(tree->payload.add1);
+    printf(")");
+    return;
+  case TreeAdd::TreeAddType::ADD2:
+    printf("Add2( ");
+    printAdd(tree->payload.add2.add);
+    printf(", ");
+    printMul(tree->payload.add2.mul);
+    printf(" )");
+    return;
+  }
+}
+
+void printMul(const TreeMul * tree)
+{
+  if (tree == nullptr)
   {
-    std::cout << "DIGIT ( "<< tree->payload.value;
-    break;
+    printf("NULL");
+    return;
   }
-  case TreeType::NUM1:
+  switch (tree->type)
   {
-    std::cout << "NUM1 (";
-    print(tree->payload.branch);
-    std::cout << ")";
-    break;
+  case TreeMul::TreeMulType::MUL1:
+    printf("Mul1( ");
+    printPrim(tree->payload.mul1);
+    printf(" )");
+    return;
+  case TreeMul::TreeMulType::MUL2:
+    printf("Mul2( ");
+    printMul(tree->payload.mul2.mul);
+    printf(", ");
+    printPrim(tree->payload.mul2.prim);
+    printf(" )");
+    return;
   }
-  case TreeType::NUM2:
+}
+
+void printPrim(const TreePrim * tree)
+{
+  if (tree == nullptr)
   {
-    std::cout << "NUM2 (";
-    print(tree->payload.branches.left);
-    std::cout << ", ";
-    print(tree->payload.branches.right);
-    std::cout << ")";
-    break;
+    printf("NULL");
+    return;
   }
-  case TreeType::PRIM:
+  switch (tree->type)
   {
-    std::cout << "PRIM (";
-    print(tree->payload.branch);
-    break;
+  case TreePrim::TreePrimType::NUM:
+    printf("Prim( ");
+    printNum(tree->payload.num);
+    printf(" )");
+    return;
+  case TreePrim::TreePrimType::ADD:
+    printf("Prim( ");
+    printAdd(tree->payload.add);
+    printf(" )");
+    return;
   }
-  case TreeType::MUL1:
+}
+
+void printNum(const TreeNum * tree)
+{
+  if (tree == nullptr)
   {
-    std::cout << "MUL1 (";
-    print(tree->payload.branch);
-    break;
+    printf("NULL");
+    return;
   }
-  case TreeType::MUL2:
+  switch (tree->type)
   {
-    std::cout << "MUL2 (";
-    print(tree->payload.branches.left);
-    std::cout << ", ";
-    print(tree->payload.branches.right);
-    break;
+  case TreeNum::TreeNumType::NUM1:
+    printf("Num1( ");
+    printDigit(tree->payload.num1);
+    printf(" )");
+    return;
+  case TreeNum::TreeNumType::NUM2:
+    printf("Num2( ");
+    printNum(tree->payload.num2.num);
+    printf(", ");
+    printDigit(tree->payload.num2.digit);
+    printf(" )");
+    return;
   }
-  case TreeType::ADD1:
+}
+
+void printDigit(const TreeDigit * tree)
+{
+  if (tree == nullptr)
   {
-    std::cout << "ADD1 (";
-    print(tree->payload.branch);
-    break;
+    printf("NULL");
+    return;
   }
-  case TreeType::ADD2:
-  {
-    std::cout << "ADD2 (";
-    print(tree->payload.branches.left);
-    std::cout << ", ";
-    print(tree->payload.branches.right);
-    break;
-  }
-  case TreeType::STMT:
-  {
-    std::cout << "STMT (";
-    print(tree->payload.branch);
-    break;
-  }
-  }
-  std::cout << ")";
+  printf("Digit ( %d )", tree->value);
+  return;
 }
 
-void printTree(const Tree * tree)
+
+TreeDigit * generate_digit(int d)
 {
-  print(tree);
-  std::cout << std::endl << std::endl;
+  return new TreeDigit{ d };
 }
-Tree * generate(TreeType treeType, TreePayload treePayload)
+TreeNum * generate_num1(TreeDigit * digit)
 {
-    Tree * tree = new Tree{ treeType, treePayload };
-  return tree;
+  return new TreeNum{ digit };
 }
-
-Tree * generate_num1(Tree * branch)
+TreeNum * generate_num2(TreeNum * num,TreeDigit * digit)
 {
-  return new Tree{ TreeType::NUM1, {branch}};
+  return new TreeNum{ num,digit };
 }
-
-Tree *generate_num2(Tree *branch1, Tree *branch2)
+TreePrim * generate_prim(TreeNum * num)
 {
-  return new Tree{ TreeType::NUM2,{branch1,branch2,'\0'} };
+  return new TreePrim{ num };
 }
-
-Tree * generate_prim(Tree * branch)
+TreePrim * generate_prim(TreeAdd * add)
 {
-  return new Tree{ TreeType::PRIM, {branch}};
+  return new TreePrim{ add };
 }
-
-Tree * generate_add1(Tree * branch)
+TreeMul * generate_mul1(TreePrim * mul)
 {
-  return new Tree{ TreeType::ADD1, {branch}};
+  return new TreeMul{ mul };
 }
-
-Tree * generate_add2(Tree * branch1, Tree* branch2, char op)
+TreeMul * generate_mul2(TreeMul * mul,TreePrim * prim, char op)
 {
-  return new Tree{ TreeType::ADD2, {branch1,branch2,op}};
+  return new TreeMul{ mul, prim, op };
 }
-
-
-Tree * generate_mul1(Tree * branch)
+TreeAdd * generate_add1(TreeMul * mul)
 {
-  return new Tree{ TreeType::MUL1, {branch}};
+  return new TreeAdd{ mul };
 }
-
-Tree * generate_mul2(Tree * branch1, Tree* branch2, char op)
+TreeAdd * generate_add2(TreeAdd * add, TreeMul * mul,char op)
 {
-  return new Tree{ TreeType::MUL2, {branch1,branch2,op}};
+  return new TreeAdd{ add,mul,op };
 }
-
-
-Tree * generate_digit(int d)
+TreeStmt * generate_stmt(TreeAdd * add)
 {
-  return new Tree{ TreeType::DIGIT, {d} };
+  return new TreeStmt{ add };
 }
 
-Tree *generate_stmt(Tree * branch)
-{
-  return new Tree{ TreeType::STMT,{branch} };
-}
-
+/*
 void clear(Tree * tree)
 {
   if (tree == nullptr)
@@ -168,16 +197,58 @@ void clear(Tree * tree)
   }
   delete tree;
 }
+*/
 
 void test()
 {
-  Tree * t1 = generate_add2(generate_mul2(generate_prim(generate_num1(generate_digit(0))),generate_prim(generate_num1(generate_digit(4))),'/' ),
-                            generate_mul2(generate_prim(generate_num1(generate_digit(1))),generate_prim(generate_num1(generate_digit(3))),'*' ),'-');
-  printTree(t1);
-  clear(t1);
+  //expression: 0/4-(1*3)
+  TreeAdd * t =
+    generate_add2(
+      generate_add1(
+        generate_mul2(
+          generate_mul1(
+            generate_prim(
+              generate_num1(
+                generate_digit(0)
+              )
+            )
+          ),
+          generate_prim(
+            generate_num1(
+              generate_digit(4)
+            )
+          ),
+        '/'
+      )
+    ),
+      generate_mul1(
+        generate_prim(
+          generate_add1(
+            generate_mul2(
+              generate_mul1(
+                generate_prim(
+                  generate_num1(
+                    generate_digit(1)
+                  )
+                )
+              ),
+              generate_prim(
+                generate_num1(
+                  generate_digit(3)
+                )
+              ),
+              '*'
+            )
+          )
+        )
+      ),
+      '-'
+    );
 
-  Tree * t2 = generate_num1(generate_digit(3));
-  printTree(t2);
+  printAdd(t);
+
+  /*TreeNum * t2 = generate_num1(generate_digit(3));
+  printNum(t2);
   clear(t2);
 
   Tree * t3 =generate_prim(generate_num1(generate_digit(6)));
@@ -192,7 +263,7 @@ void test()
   printTree(t5);
   clear(t5);
 
-  Tree * t6 = generate_mul2(generate_prim(generate_num1(generate_digit(0))),generate_prim(generate_num1(generate_digit(4))),'/');
+  TreeMul * t6 = generate_mul2(generate_mul1(generate_prim(generate_num1(generate_digit(0)))),generate_prim(generate_num1(generate_digit(4))),'/');
   printTree(t6);
   clear(t6);
 
@@ -202,10 +273,11 @@ void test()
 
   Tree * t8 = generate_mul2(generate_prim(generate_num1(generate_digit(8))), nullptr,'*');
   printTree(t8);
-  clear(t8);
+  clear(t8);*/
 
 }
 
+/*
 int calculateTree(Tree * tree)
 {
   if (tree == nullptr)
@@ -255,8 +327,8 @@ int calculateTree(Tree * tree)
   }
   }
 }
-
-int main1()
+*/
+int main()
 {
   test();
   char wait; std::cin >> wait;
