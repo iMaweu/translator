@@ -117,6 +117,13 @@ void clearPrim(TreePrim * tree);
 void clearNum(TreeNum * tree);
 void clearDigit(TreeDigit * tree);
 
+int calculateStmt(TreeStmt * tree);
+int calculateAdd(TreeAdd * tree);
+int calculateMul(TreeMul * tree);
+int calculatePrim(TreePrim * tree);
+int calculateNum(TreeNum * tree);
+int calculateDigit(TreeDigit * tree);
+
 void test();
 
 int calculateTree(TreeStmt *);
