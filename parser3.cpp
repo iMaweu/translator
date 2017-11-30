@@ -214,7 +214,7 @@ void run_asserts()
 
 }
 
-int main()
+int main1()
 {
   run_asserts();
   char wait = getc(stdin);

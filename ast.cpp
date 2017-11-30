@@ -13,7 +13,7 @@ void print(const Tree * tree)
   {
   case TreeType::DIGIT:
   {
-    std::cout << "DIGIT ( "<< tree->payload.value << " )";
+    std::cout << "DIGIT ( "<< tree->payload.value;
     break;
   }
   case TreeType::NUM1:
@@ -36,14 +36,12 @@ void print(const Tree * tree)
   {
     std::cout << "PRIM (";
     print(tree->payload.branch);
-    std::cout << ")";
     break;
   }
   case TreeType::MUL1:
   {
     std::cout << "MUL1 (";
     print(tree->payload.branch);
-    std::cout << ")";
     break;
   }
   case TreeType::MUL2:
@@ -52,14 +50,12 @@ void print(const Tree * tree)
     print(tree->payload.branches.left);
     std::cout << ", ";
     print(tree->payload.branches.right);
-    std::cout << ")";
     break;
   }
   case TreeType::ADD1:
   {
     std::cout << "ADD1 (";
     print(tree->payload.branch);
-    std::cout << ")";
     break;
   }
   case TreeType::ADD2:
@@ -68,17 +64,16 @@ void print(const Tree * tree)
     print(tree->payload.branches.left);
     std::cout << ", ";
     print(tree->payload.branches.right);
-    std::cout << ")";
     break;
   }
   case TreeType::STMT:
   {
     std::cout << "STMT (";
     print(tree->payload.branch);
-    std::cout << ")";
     break;
   }
   }
+  std::cout << ")";
 }
 
 void printTree(const Tree * tree)
@@ -147,57 +142,30 @@ void clear(Tree * tree)
   }
   switch (tree->type)
   {
+  case TreeType::DIGIT:
+  {
+    break;
+  }
+  case TreeType::STMT:
+  case TreeType::PRIM:
+  case TreeType::NUM1:
+  case TreeType::MUL1:
   case TreeType::ADD1:
   {
     clear(tree->payload.branch);
     break;
   }
+  case TreeType::MUL2:
+  case TreeType::NUM2:
   case TreeType::ADD2:
   {
     clear(tree->payload.branches.left);
     clear(tree->payload.branches.right);
     break;
   }
-  case TreeType::MUL1:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
-  case TreeType::MUL2:
-  {
-    clear(tree->payload.branches.left);
-    clear(tree->payload.branches.right);
-    break;
-  }
-  case TreeType::PRIM:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
-  case TreeType::NUM1:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
-  case TreeType::NUM2:
-  {
-    clear(tree->payload.branches.left);
-    clear(tree->payload.branches.right);
-    break;
-  }
-  case TreeType::STMT:
-  {
-    clear(tree->payload.branch);
-    break;
-  }
-  case TreeType::DIGIT:
-  {
-    break;
-  }
   }
   delete tree;
 }
-
 
 void test()
 {
@@ -284,7 +252,7 @@ int calculateTree(Tree * tree)
   }
 }
 
-int main1()
+int main()
 {
   test();
   char wait; std::cin >> wait;

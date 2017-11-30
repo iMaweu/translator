@@ -2,7 +2,7 @@
 #define AST_H
 struct Tree;
 
-enum class TreeType { STMT,ADD1,ADD2, MUL1, MUL2, PRIM, NUM1, NUM2, DIGIT, SUB2, DIV2};
+enum class TreeType { STMT,ADD1,ADD2, MUL1, MUL2, PRIM, NUM1, NUM2, DIGIT};
 
 union TreePayload
 {
