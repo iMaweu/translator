@@ -9,123 +9,132 @@ enum class Status
   SYNTAX_ERROR
 };
 
-bool stmt(const char * s, Tree  * &tree);
-bool add(const char * &s, Tree * &tree);
-bool mul(const char * &s, Tree * &tree);
-bool prim(const char * &s, Tree * &tree);
-bool digit(const char * &s, Tree * &tree);
-bool integer(const char * &s, Tree * &tree);
+bool stmt(const char * s, TreeStmt  * &tree);
+bool add(const char * &s, TreeAdd * &tree);
+bool mul(const char * &s, TreeMul * &tree);
+bool prim(const char * &s, TreePrim * &tree);
+bool digit(const char * &s, TreeDigit * &tree);
+bool num(const char * &s, TreeNum * &tree);
 Status parse(const char * s, int expect);
 
-bool stmt(const char * s, Tree * &tree)
+bool stmt(const char * s, TreeStmt * &tree)
 {
-  bool validAdd = add(s, tree);
+  TreeStmt * tree2 = generate_stmt(nullptr);
+  bool validAdd = add(s, tree2->add);
+  tree = tree2;
   if (validAdd && s[0] == ';')
   {
-    tree = generate_stmt(tree);
     return true;
   }
   return false;
 }
 
-bool add(const char * &s, Tree* &tree)
+bool add(const char * &s, TreeAdd * &tree)
 {
-  if (!mul(s, tree))
+  TreeAdd * tree2 = generate_add1(nullptr);
+  if (!mul(s, tree2->payload.add1))
   {
     return false;
   }
 
-  Tree * tree2{ nullptr };
+  tree = tree2;
+  TreeAdd * tree3 = generate_add1(nullptr);
   while (true)
   {
     switch (*s)
     {
     case '+':
       s++;
-      if (!mul(s, tree2))
+      if (!mul(s, tree3->payload.add1))
       {
         return false;
       }
-      tree = generate_add2(tree, tree2, '+');
+      tree = generate_add2(tree, tree3->payload.add1, '+');
       break;
     case '-':
       s++;
-      if (!mul(s, tree2))
+      if (!mul(s, tree3->payload.add1))
       {
         return false;
       }
-      tree = generate_add2(tree, tree2, '-');
+      tree = generate_add2(tree, tree3->payload.add1, '-');
       break;
     default:
-      tree = generate_add1(tree);
       return true;
     }
   }
 }
 
-bool mul(const char * &s, Tree * &tree)
+bool mul(const char * &s, TreeMul * &tree)
 {
-  if (!prim(s, tree))
+  TreeMul * tree2 = generate_mul1(nullptr);
+  if (!prim(s, tree2->payload.mul1))
   {
     return false;
   }
 
-  Tree * tree2{ nullptr };
+  tree = tree2;
+  TreeMul* tree3 = generate_mul1(nullptr);
   while (true)
   {
     switch (*s)
     {
     case '*':
       s++;
-      if (!prim(s, tree2))
+      if (!prim(s, tree3->payload.mul1))
       {
         return false;
       }
-      tree = generate_mul2(tree, tree2, '*');
+      tree = generate_mul2(tree, tree3->payload.mul1, '*');
       break;
     case '/':
       s++;
-      if (!prim(s, tree2))
+      if (!prim(s, tree3->payload.mul1))
       {
         return false;
       }
-      tree = generate_mul2(tree, tree2, '/');
+      tree = generate_mul2(tree, tree3->payload.mul1, '/');
       break;
     default:
-      tree = generate_mul1(tree);
       return true;
     }
   }
 }
 
-bool prim(const char * &s, Tree * &tree)
+bool prim(const char * &s, TreePrim * &tree)
 {
   if (s[0] == '(')
   {
-    if (!add(++s, tree) || s[0] != ')')
+    TreePrim * tree2 = generate_prim_add(nullptr);
+    s++;
+    if (add(s, tree2->payload.add) && s[0] == ')')
     {
-      return false;
+      tree = tree2;
+      s++;
+      return true;
     }
-    ++s;
-  }
-  else if (!integer(s, tree))
-  {
     return false;
   }
-  tree = generate_prim(tree);
-  return true;
+
+  TreePrim * tree3 = generate_prim_num(nullptr);
+  if (num(s, tree3->payload.num))
+  {
+    tree = tree3;
+    return true;
+  }
+  return false;
 }
 
-bool integer(const char * &s, Tree* &tree)
+bool num(const char * &s, TreeNum * &tree)
 {
-
-  if (digit(s, tree))
+  TreeNum * tree2 = generate_num1(nullptr);
+  if (digit(s, tree2->payload.num1))
   {
-    tree = generate_num1(tree);
-    Tree * tree2{ nullptr };
-    while (digit(s, tree2))
+    tree = tree2;
+    TreeNum * tree3 = generate_num1(nullptr);
+    while (digit(s, tree3->payload.num1))
     {
-      tree = generate_num2(tree, tree2);
+      tree = generate_num2(tree, tree3->payload.num1);
     }
     return true;
   }
@@ -135,7 +144,7 @@ bool integer(const char * &s, Tree* &tree)
   }
 }
 
-bool digit(const char * &s, Tree * &tree)
+bool digit(const char * &s, TreeDigit * &tree)
 {
   if (s[0] >= '0' && s[0] <= '9')
   {
@@ -151,15 +160,25 @@ bool digit(const char * &s, Tree * &tree)
 
 Status parse(const char * s, int expect)
 {
-  Tree * tree{ nullptr };
+  TreeStmt * tree = generate_stmt(nullptr);
   if (!stmt(s, tree))
   {
+    clearStmt(tree);
     return Status::SYNTAX_ERROR;
+  }
+  else if ( calculateStmt(tree) == expect)
+  {
+    printStmt(tree);
+    printf("\n");
+    clearStmt(tree);
+    return Status::OK;
   }
   else
   {
-    return calculateTree(tree) == expect ? Status::OK : Status::WRONG_RESULT;
+    clearStmt(tree);
+    return Status::WRONG_RESULT;
   }
+  
 }
 
 void run_asserts()
@@ -214,9 +233,10 @@ void run_asserts()
 
 }
 
-int main1()
+int main()
 {
   run_asserts();
+
   char wait = getc(stdin);
   return 0;
 }
