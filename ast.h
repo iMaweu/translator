@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "ast.h"
+
 struct TreeAdd;
 
 struct TreeDigit
@@ -92,16 +94,40 @@ struct TreeStmt
   TreeStmt(TreeAdd * _add) : add(_add) {}
 };
 
+struct Tree
+{
+  enum TreeType {NUMBER,OPER} type;
+  union 
+  {
+    struct
+    {
+      Tree * left;
+      Tree * right;
+      char operType;
+    } oper;
+    int number;
+  } value;
+};
+
+
 TreeDigit * generate_digit(int d);
 TreeNum *generate_num1(TreeDigit *);
 TreeNum *generate_num2(TreeNum *,TreeDigit *);
-TreePrim *generate_prim(TreeNum *);
-TreePrim *generate_prim(TreeAdd *);
+TreePrim *generate_prim_num(TreeNum *);
+TreePrim *generate_prim_add(TreeAdd *);
 TreeMul *generate_mul1(TreePrim *);
 TreeMul *generate_mul2(TreeMul *,TreePrim *, char);
 TreeAdd *generate_add1(TreeMul *);
 TreeAdd *generate_add2(TreeAdd *,TreeMul*,char);
 TreeStmt *generate_stmt(TreeAdd *);
+
+void clearStmt(TreeStmt * tree);
+void clearAdd(TreeAdd * tree);
+void clearMul(TreeMul * tree);
+void clearPrim(TreePrim * tree);
+void clearNum(TreeNum * tree);
+void clearDigit(TreeDigit * tree);
+void test();
 
 void printStmt(const TreeStmt * tree);
 void printAdd(const TreeAdd * tree);
@@ -110,12 +136,6 @@ void printPrim(const TreePrim * tree);
 void printNum(const TreeNum * tree);
 void printDigit(const TreeDigit * tree);
 
-void clearStmt(TreeStmt * tree);
-void clearAdd(TreeAdd * tree);
-void clearMul(TreeMul * tree);
-void clearPrim(TreePrim * tree);
-void clearNum(TreeNum * tree);
-void clearDigit(TreeDigit * tree);
 
 int calculateStmt(TreeStmt * tree);
 int calculateAdd(TreeAdd * tree);
@@ -123,8 +143,6 @@ int calculateMul(TreeMul * tree);
 int calculatePrim(TreePrim * tree);
 int calculateNum(TreeNum * tree);
 int calculateDigit(TreeDigit * tree);
-
-void test();
 
 int calculateTree(TreeStmt *);
 #endif
