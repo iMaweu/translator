@@ -1,21 +1,8 @@
 #include <stdio.h>
 #include <assert.h>
+
 #include "ast.h"
-
-enum class Status
-{
-  OK,
-  WRONG_RESULT,
-  SYNTAX_ERROR
-};
-
-bool stmt(const char * s, TreeStmt  * &tree);
-bool add(const char * &s, TreeAdd * &tree);
-bool mul(const char * &s, TreeMul * &tree);
-bool prim(const char * &s, TreePrim * &tree);
-bool digit(const char * &s, TreeDigit * &tree);
-bool num(const char * &s, TreeNum * &tree);
-Status parse(const char * s, int expect);
+#include "parser.h"
 
 bool stmt(const char * s, TreeStmt * &tree)
 {
@@ -178,7 +165,6 @@ Status parse(const char * s, int expect)
     clearStmt(tree);
     return Status::WRONG_RESULT;
   }
-  
 }
 
 void run_asserts()
@@ -230,13 +216,5 @@ void run_asserts()
   assert(parse("(6-2)*2;", 8) == Status::OK);
   assert(parse("(6-2)*2;", 7) == Status::WRONG_RESULT);
   assert(parse("(6-2)*2", 8) == Status::SYNTAX_ERROR);
-
 }
 
-int main()
-{
-  run_asserts();
-
-  char wait = getc(stdin);
-  return 0;
-}

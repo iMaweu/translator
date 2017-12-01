@@ -4,7 +4,6 @@
 
 #include "ast.h"
 
-
 TreeDigit * generate_digit(int d)
 {
   return new TreeDigit{ d };
@@ -128,11 +127,4 @@ void test()
   printMul(t8);
   clearMul(t8);
   printf("\n");
-}
-
-int main1()
-{
-  test();
-  char wait; std::cin >> wait;
-  return 0;
 }

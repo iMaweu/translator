@@ -1,8 +1,6 @@
 #ifndef AST_H
 #define AST_H
 
-#include "ast.h"
-
 struct TreeAdd;
 
 struct TreeDigit
@@ -127,7 +125,6 @@ void clearMul(TreeMul * tree);
 void clearPrim(TreePrim * tree);
 void clearNum(TreeNum * tree);
 void clearDigit(TreeDigit * tree);
-void test();
 
 void printStmt(const TreeStmt * tree);
 void printAdd(const TreeAdd * tree);
@@ -144,5 +141,5 @@ int calculatePrim(TreePrim * tree);
 int calculateNum(TreeNum * tree);
 int calculateDigit(TreeDigit * tree);
 
-int calculateTree(TreeStmt *);
+void test();
 #endif
