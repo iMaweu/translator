@@ -2,7 +2,7 @@
 
 #include "ast.h"
 
-void print(Tree * tree)
+void print(const Tree * tree)
 {
   if (tree == nullptr)
   {
@@ -23,7 +23,7 @@ void print(Tree * tree)
   }
 }
 
-void printTree(Tree * tree)
+void printTree(const Tree * tree)
 {
   print(tree);
   printf("\n");

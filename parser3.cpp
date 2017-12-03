@@ -9,15 +9,18 @@ Status parse(const char * s, int expect)
   Tree * tree = generate_branch(0);
   if (!stmt(s, tree) || s[0] != ';')
   {
+    clearTree(tree);
     return Status::SYNTAX_ERROR;
   }
   else if (calculateTree(tree) == expect)
   {
     printTree(tree);
+    clearTree(tree);
     return Status::OK;
   }
   else
   {
+    clearTree(tree);
     return Status::WRONG_RESULT;
   }
 }

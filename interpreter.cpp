@@ -2,7 +2,7 @@
 
 #include "ast.h"
 
-int calculateTree(Tree * tree)
+int calculateTree(const Tree * tree)
 {
   if (tree == nullptr)
   {

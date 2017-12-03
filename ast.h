@@ -25,10 +25,10 @@ struct Tree
 Tree * generate_tree(Tree* _left, Tree * _right, char _operType);
 Tree * generate_branch(int number);
 
-void printTree(Tree * tree);
+void printTree(const Tree * tree);
 
-void clearTree(Tree * tree);
+void clearTree(Tree * &tree);
 
-int calculateTree(Tree * tree);
+int calculateTree(const Tree * tree);
 
 #endif
