@@ -10,11 +10,11 @@ enum class Status
 
 Status parse(const char * s, int expect);
 
-bool stmt(const char * &s, Tree * &tree);
-bool add(const char * &s, Tree * &tree);
-bool mul(const char * &s, Tree * &tree);
-bool prim(const char * &s, Tree * &tree);
-bool num(const char * &s, Tree * &tree);
+Tree * stmt(const char * &s);
+Tree * add(const char * &s);
+Tree * mul(const char * &s);
+Tree * prim(const char * &s);
+Tree * num(const char * &s);
 
 void run_asserts();
 

@@ -6,13 +6,13 @@
 
 Status parse(const char * s, int expect)
 {
-  Tree * tree = generate_branch(0);
-  if (!stmt(s, tree) || s[0] != ';')
+  Tree * tree = stmt(s);
+  if (!tree || s[0] != ';')
   {
     clearTree(tree);
     return Status::SYNTAX_ERROR;
   }
-  else if (calculateTree(tree) == expect)
+  else if (interpret(tree) == expect)
   {
     printTree(tree);
     clearTree(tree);
@@ -25,90 +25,91 @@ Status parse(const char * s, int expect)
   }
 }
 
-bool stmt(const char * &s, Tree * &tree)
+Tree * stmt(const char * &s)
 {
-  return add(s,tree);
+  return add(s);
 }
 
-bool add(const char * &s, Tree * &tree)
+Tree * add(const char * &s)
 {
-  if (!mul(s, tree))
+  Tree * tree = mul(s);
+  if (!tree)
   {
-    return false;
+    return nullptr;
   }
   while (s[0] == '+' || s[0] == '-')
   {
     char operType = s[0];
     s++;
-    Tree * tree2 = generate_branch(0);
-    if (!mul(s, tree2))
+    Tree * tree2 = mul(s);
+    if (!tree2)
     {
-      return false;
+      return nullptr;
     }
-    tree = generate_tree(tree, tree2, operType);
+    tree = new Tree{ tree, tree2, operType };
   }
-  return true;
+  return tree;
 }
 
-bool mul(const char * &s, Tree * &tree)
+Tree * mul(const char * &s)
 {
-  if (!prim(s, tree))
+  Tree * tree = prim(s);
+  if (!tree)
   {
-    return false;
+    return nullptr;
   }
 
   while (s[0] == '*' || s[0] == '/')
   {
     char operType = s[0];
     s++;
-    Tree * tree2 = generate_branch(0);
-    if (!prim(s, tree2))
+    Tree * tree2 = prim(s);
+    if (!tree2)
     {
-      return false;
+      return nullptr;
     }
-    tree = generate_tree(tree, tree2, operType);
+    tree = new Tree{ tree, tree2, operType };
   }
-  return true;
+  return tree;
 }
 
-bool prim(const char * &s, Tree * &tree)
+Tree * prim(const char * &s)
 {
   if (s[0] == '(')
   {
     s++;
-    add(s, tree);
+    Tree * tree = add(s);
     if (s[0] == ')')
     {
       s++;
-      return true;
+      return tree;
     }
     else
     {
-      return false;
+      return nullptr;
     }
   }
   else
   {
-    return num(s, tree);
+    return num(s);
   }
 }
 
-bool num(const char * &s, Tree * &tree)
+Tree * num(const char * &s)
 {
   if (s[0] >= '0' && s[0] <= '9')
   {
-    Tree * tree2 = generate_branch(s[0] - '0');
+    Tree * tree = new Tree{ s[0] - '0' };
     s++;
     while (s[0] >= '0' && s[0] <= '9')
     {
-      tree2->value.number *= 10;
-      tree2->value.number += (s[0] - '0');
+      tree->value.number *= 10;
+      tree->value.number += (s[0] - '0');
       s++;
     }
-    tree = tree2;
-    return true;
+    return tree;
   }
-  return false;
+  return nullptr;
 }
 
 void run_asserts()
