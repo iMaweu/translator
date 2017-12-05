@@ -5,7 +5,6 @@
 
 int main()
 {
-  test();
   run_asserts();
 
   char wait = getc(stdin);
