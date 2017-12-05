@@ -2,7 +2,7 @@
 
 #include "ast.h"
 
-int calculateTree(const Tree * tree)
+int interpret(const Tree * tree)
 {
   if (tree == nullptr)
   {
@@ -18,20 +18,20 @@ int calculateTree(const Tree * tree)
     switch (tree->value.oper.operType)
     {
     case '+':
-      return calculateTree(tree->value.oper.left) +
-        calculateTree(tree->value.oper.right);
+      return interpret(tree->value.oper.left) +
+        interpret(tree->value.oper.right);
 
     case '-':
-      return calculateTree(tree->value.oper.left) - 
-        calculateTree(tree->value.oper.right);
+      return interpret(tree->value.oper.left) - 
+        interpret(tree->value.oper.right);
 
     case '*':
-      return calculateTree(tree->value.oper.left) * 
-        calculateTree(tree->value.oper.right);
+      return interpret(tree->value.oper.left) * 
+        interpret(tree->value.oper.right);
 
     case '/':
-      return calculateTree(tree->value.oper.left) / 
-        calculateTree(tree->value.oper.right);
+      return interpret(tree->value.oper.left) / 
+        interpret(tree->value.oper.right);
     }
   }
 }
