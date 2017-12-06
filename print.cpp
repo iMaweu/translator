@@ -1,8 +1,9 @@
 #include <stdio.h>
+#include <memory>
 
 #include "ast.h"
 
-void print(const Tree * tree)
+void print(const std::shared_ptr<Tree> tree)
 {
   if (tree == nullptr)
   {
@@ -23,7 +24,7 @@ void print(const Tree * tree)
   }
 }
 
-void printTree(const Tree * tree)
+void printTree(const std::shared_ptr<Tree> tree)
 {
   print(tree);
   printf("\n");

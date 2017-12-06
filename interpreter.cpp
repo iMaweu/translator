@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-int interpret(const Tree * tree)
+int interpret(const std::shared_ptr<Tree> tree)
 {
   if (tree == nullptr)
   {
