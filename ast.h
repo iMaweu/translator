@@ -11,6 +11,13 @@ struct Tree
   Tree(Tree_ptr&& _left, Tree_ptr&& _right, const char _operType) : type{ OPER }, value { std::move(_left), std::move(_right), _operType  } {}
   Tree(const int _number) : type{ NUMBER }, value { _number } {}
   Tree() : type{ NUMBER }, value { 0 } {}
+  ~Tree()
+  {
+    if (type == Tree::TreeType::OPER)
+    {
+      value.oper.~operation();
+    }
+  }
 
   enum TreeType {NUMBER,OPER} type;
 
