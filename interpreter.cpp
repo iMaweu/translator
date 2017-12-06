@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-int interpret(const std::shared_ptr<Tree> tree)
+int interpret(const Tree_ptr&& tree)
 {
   if (tree == nullptr)
   {
@@ -19,8 +19,8 @@ int interpret(const std::shared_ptr<Tree> tree)
   }
   else if (tree->type == Tree::TreeType::OPER)
   {
-    int left = interpret(tree->value.oper.left);
-    int right = interpret(tree->value.oper.right);
+    int left = interpret(std::move(tree->value.oper.left));
+    int right = interpret(std::move(tree->value.oper.right));
 
     if (left == INT_MAX || right == INT_MAX)
     {
@@ -41,5 +41,6 @@ int interpret(const std::shared_ptr<Tree> tree)
     case '/':
       return left / right;
     }
+    return INT_MAX;
   }
 }

@@ -5,14 +5,14 @@
 
 Status parse(const char * s, int expect)
 {
-  std::shared_ptr<Tree> tree = stmt(s);
+  Tree_ptr tree = stmt(s);
   if (!tree || s[0] != ';')
   {
     return Status::SYNTAX_ERROR;
   }
-  else if (interpret(tree) == expect)
+  else if (interpret(std::move(tree)) == expect)
   {
-    printTree(tree);
+    printTree(std::move(tree));
     return Status::OK;
   }
   else
@@ -21,14 +21,14 @@ Status parse(const char * s, int expect)
   }
 }
 
-std::shared_ptr<Tree> stmt(const char * &s)
+Tree_ptr stmt(const char * &s)
 {
   return add(s);
 }
 
-std::shared_ptr<Tree> add(const char * &s)
+Tree_ptr add(const char * &s)
 {
-  std::shared_ptr<Tree> tree = mul(s);
+  Tree_ptr tree = mul(s);
 
   if (!tree)
   {
@@ -38,20 +38,20 @@ std::shared_ptr<Tree> add(const char * &s)
   {
     char operType = s[0];
     s++;
-    std::shared_ptr<Tree> tree2{ mul(s) };
+    Tree_ptr tree2= mul(s);
     if (!tree2)
     {
       return nullptr;
     }
-    std::shared_ptr<Tree> tree3{ new Tree{ tree, tree2, operType } };
-    tree = tree3;
+    Tree_ptr tree3{ new Tree{std::move(tree), std::move(tree2), operType} };
+    tree = std::move(tree3);
   }
   return tree;
 }
 
-std::shared_ptr<Tree> mul(const char * &s)
+Tree_ptr mul(const char * &s)
 {
-  std::shared_ptr<Tree> tree = prim(s);
+  Tree_ptr tree = prim(s);
   if (!tree)
   {
     return nullptr;
@@ -61,23 +61,23 @@ std::shared_ptr<Tree> mul(const char * &s)
   {
     char operType = s[0];
     s++;
-    std::shared_ptr<Tree> tree2{ prim(s) };
+    Tree_ptr tree2 = prim(s);
     if (!tree2)
     {
       return nullptr;
     }
-    std::shared_ptr<Tree> tree3{ new Tree{ tree, tree2, operType } };
-    tree = tree3;
+    Tree_ptr tree3{ new Tree {std::move(tree), std::move(tree2), operType} };
+    tree = std::move(tree3);
   }
   return tree;
 }
 
-std::shared_ptr<Tree> prim(const char * &s)
+Tree_ptr prim(const char * &s)
 {
   if (s[0] == '(')
   {
     s++;
-    std::shared_ptr<Tree> tree = add(s);
+    Tree_ptr tree = add(s);
     if (s[0] == ')')
     {
       s++;
@@ -94,11 +94,11 @@ std::shared_ptr<Tree> prim(const char * &s)
   }
 }
 
-std::shared_ptr<Tree> num(const char * &s)
+Tree_ptr num(const char * &s)
 {
   if (s[0] >= '0' && s[0] <= '9')
   {
-    std::shared_ptr<Tree> tree{ new Tree{ s[0] - '0' } };
+    Tree_ptr tree{ new Tree {s[0] - '0'} };
     s++;
     while (s[0] >= '0' && s[0] <= '9')
     {

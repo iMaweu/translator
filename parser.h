@@ -10,10 +10,10 @@ enum class Status
 
 Status parse(const char * s, int expect);
 
-std::shared_ptr<Tree> stmt(const char * &s);
-std::shared_ptr<Tree> add(const char * &s);
-std::shared_ptr<Tree> mul(const char * &s);
-std::shared_ptr<Tree> prim(const char * &s);
-std::shared_ptr<Tree> num(const char * &s);
+Tree_ptr stmt(const char * &s);
+Tree_ptr add(const char * &s);
+Tree_ptr mul(const char * &s);
+Tree_ptr prim(const char * &s);
+Tree_ptr num(const char * &s);
 
 #endif

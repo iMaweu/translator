@@ -3,7 +3,7 @@
 
 #include "ast.h"
 
-void print(const std::shared_ptr<Tree> tree)
+void print(const Tree_ptr&& tree)
 {
   if (tree == nullptr)
   {
@@ -17,15 +17,15 @@ void print(const std::shared_ptr<Tree> tree)
   else if (tree->type == Tree::TreeType::OPER)
   {
     printf("( ");
-    print(tree->value.oper.left);
+    print(std::move(tree->value.oper.left));
     printf(" %c ", tree->value.oper.operType);
-    print(tree->value.oper.right);
+    print(std::move(tree->value.oper.right));
     printf(" )");
   }
 }
 
-void printTree(const std::shared_ptr<Tree> tree)
+void printTree(const Tree_ptr&& tree)
 {
-  print(tree);
+  print(std::move(tree));
   printf("\n");
 }

@@ -2,9 +2,13 @@
 #define AST_H
 #include <memory>
 
+struct Tree;
+
+typedef std::unique_ptr<Tree>  Tree_ptr;
+
 struct Tree
 {
-  Tree(const std::shared_ptr<Tree>  _left, const std::shared_ptr<Tree> _right, const char _operType) : type{ OPER }, value { _left, _right, _operType } {}
+  Tree(Tree_ptr&& _left, Tree_ptr&& _right, const char _operType) : type{ OPER }, value { std::move(_left), std::move(_right), _operType  } {}
   Tree(const int _number) : type{ NUMBER }, value { _number } {}
   Tree() : type{ NUMBER }, value { 0 } {}
 
@@ -12,16 +16,17 @@ struct Tree
 
   union TreePayload
   {
-    TreePayload(const std::shared_ptr<Tree> _left, const std::shared_ptr<Tree> _right, const char _operType) : oper{ _left, _right, _operType } {}
+    TreePayload(Tree_ptr&& _left, Tree_ptr&& _right, const char _operType) : oper{ std::move(_left), std::move(_right), _operType } {}
     TreePayload(const int _number) : number{ _number } {}
     ~TreePayload() {}
 
     struct operation
     {
-      operation(const std::shared_ptr<Tree> _left, const std::shared_ptr<Tree> _right, const char _operType) : left{ _left }, right{ _right }, operType { _operType } {}
+      operation& operator=(const operation &) = delete;
+      operation(Tree_ptr&& _left, Tree_ptr&& _right, const char _operType) : left{ std::move(_left) }, right{ std::move(_right) }, operType{ _operType } {}
 
-      std::shared_ptr<Tree> left;
-      std::shared_ptr<Tree> right;
+      Tree_ptr left;
+      Tree_ptr right;
       char operType;
     } oper;
 
@@ -30,10 +35,10 @@ struct Tree
   } value;
 };
 
-void printTree(const std::shared_ptr<Tree> tree);
+void printTree(const Tree_ptr&& tree);
 
 //void clearTree(Tree * &tree);
 
-int interpret(const std::shared_ptr<Tree> tree);
+int interpret(const Tree_ptr&& tree);
 
 #endif
